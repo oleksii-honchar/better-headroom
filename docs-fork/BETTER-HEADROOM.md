@@ -28,8 +28,8 @@ See **[FEATURES.md](./docs-fork/FEATURES.md)** for detailed descriptions and con
 - **Python 3.11+** — for the virtual environment
 - **Git** — for fetching and building
 
-> **Note:** maturin, Rust, and better-litellm are auto-installed by the build script if missing.
-> The build script installs better-litellm from `../better-litellm` to satisfy headroom's `litellm>=1.86.2` requirement (PyPI only has 1.83.9).
+> **Note:** maturin and Rust are auto-installed by the build script if missing.
+> The build uses `--no-deps` since headroom's `litellm>=1.86.2` can't be resolved from PyPI (1.83.9 max) — the litellm dependency is lazy and resolved by the consuming project (better-litellm).
 
 ### Quick Install (Recommended)
 

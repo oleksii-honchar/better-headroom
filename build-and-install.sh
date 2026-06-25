@@ -122,7 +122,6 @@ check_prereqs() {
   install_rust
   ensure_venv
   install_maturin
-  install_better_litellm
 }
 
 sync_upstream() {

@@ -17,6 +17,16 @@ VENV_DIR="$REPO_DIR/.venv"
 UPSTREAM="upstream"
 BRANCH="patched/main"
 
+# Find Python 3.10+ (headroom requires >=3.10)
+PYTHON_CMD="python3"
+if command -v /opt/homebrew/bin/python3.12 >/dev/null 2>&1; then
+  PYTHON_CMD="/opt/homebrew/bin/python3.12"
+elif command -v python3.11 >/dev/null 2>&1; then
+  PYTHON_CMD="python3.11"
+elif command -v python3.12 >/dev/null 2>&1; then
+  PYTHON_CMD="python3.12"
+fi
+
 usage() {
   cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
@@ -77,9 +87,26 @@ install_maturin() {
 
 ensure_venv() {
   echo "📦 Ensuring Python virtual environment..."
+  local needs_create=false
+
   if [[ ! -d "$VENV_DIR" ]]; then
-    python3 -m venv "$VENV_DIR"
-    echo "   ✅ Created venv at $VENV_DIR"
+    needs_create=true
+  else
+    # Check if venv Python satisfies >=3.10
+    local venv_python
+    venv_python=$("$VENV_DIR/bin/python3" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null)
+    if [[ "$venv_python" == "3.9" ]]; then
+      echo "   ⚠️  Existing venv uses Python 3.9, recreating with $PYTHON_CMD..."
+      rm -rf "$VENV_DIR"
+      needs_create=true
+    fi
+  fi
+
+  if [[ "$needs_create" == "true" ]]; then
+    "$PYTHON_CMD" -m venv "$VENV_DIR"
+    local py_version
+    py_version=$("$VENV_DIR/bin/python3" --version 2>&1)
+    echo "   ✅ Created venv at $VENV_DIR ($py_version)"
   else
     echo "   ✅ Venv already exists at $VENV_DIR"
   fi

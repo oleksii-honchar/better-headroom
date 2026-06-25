@@ -146,6 +146,32 @@ class _SpyProxyMetrics:
         self.rate_limited_calls.append(kwargs)
 
 
+def test_pipeline_passes_local_provider_fallback_when_no_provider() -> None:
+    """Pipeline must pass provider='local' explicitly when _provider_name() returns None.
+
+    This ensures metrics always carry a provider attribute (ADR-004).
+    """
+    spy = _SpyMetrics()
+    set_otel_metrics(spy)  # type: ignore[arg-type]
+
+    try:
+        # No provider set — _provider_name() returns None
+        pipeline = TransformPipeline(transforms=[])
+        messages = [{"role": "user", "content": "hello world"}]
+
+        pipeline.apply(messages, model="gpt-4o", model_limit=1024)
+        assert len(spy.pipeline_calls) == 1
+
+        # The call site must pass provider="local", not None
+        call_kwargs = spy.pipeline_calls[0]
+        assert call_kwargs["provider"] == "local", (
+            f"Expected provider='local' but got {call_kwargs['provider']!r} — "
+            "pipeline must explicitly fallback to 'local' when provider is None"
+        )
+    finally:
+        reset_otel_metrics()
+
+
 def test_transform_pipeline_simulate_skips_metric_recording() -> None:
     spy = _SpyMetrics()
     set_otel_metrics(spy)  # type: ignore[arg-type]

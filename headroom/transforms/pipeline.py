@@ -497,7 +497,7 @@ class TransformPipeline:
             if record_metrics:
                 get_otel_metrics().record_pipeline_run(
                     model=model,
-                    provider=provider_name,
+                    provider=provider_name or "local",
                     tokens_before=tokens_before,
                     tokens_after=tokens_after,
                     duration_ms=pipeline_ms,

@@ -374,13 +374,13 @@ class HeadroomOtelMetrics:
                 self._attrs(provider=provider, model=model, ttl="1h"),
             )
 
-    def record_proxy_failed(self, *, provider: str | None = None, model: str | None = None) -> None:
+    def record_proxy_failed(self, *, provider: str = "local", model: str | None = None) -> None:
         self._proxy_failed_requests.add(1, self._attrs(provider=provider, model=model))
 
     def record_proxy_rate_limited(
         self,
         *,
-        provider: str | None = None,
+        provider: str = "local",
         model: str | None = None,
     ) -> None:
         self._proxy_rate_limited_requests.add(1, self._attrs(provider=provider, model=model))
@@ -393,7 +393,7 @@ class HeadroomOtelMetrics:
         self,
         *,
         model: str,
-        provider: str | None,
+        provider: str = "local",
         tokens_before: int,
         tokens_after: int,
         duration_ms: float,

@@ -240,23 +240,34 @@ python -c "from headroom.observability.metrics import Metrics; print(Metrics.cre
 
 ---
 
-## Runtime Dependencies — maturin & Rust
+## Runtime Dependencies — Auto-installed
 
-The project uses `maturin` to build the Python/Rust hybrid package. Install the required toolchain:
+The `build-and-install.sh` script auto-installs required dependencies if missing:
+
+- **Rust** — installed via rustup (if not already present)
+- **maturin** — installed via pip into the project venv
+
+The script also creates and uses a `.venv` virtual environment automatically.
 
 ```bash
-# 1. Install maturin
-pip install maturin
-
-# 2. Install Rust (if not already installed)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source $HOME/.cargo/env
-
-# 3. Verify the toolchain matches rust-toolchain.toml
-rustc --version
+# Just run the script — it installs everything needed
+./build-and-install.sh --install-editable
 ```
 
-The `rust-toolchain.toml` file specifies the required Rust version. Running any maturin command in the project directory will auto-install the correct version.
+**Manual install (if needed):**
+
+```bash
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source $HOME/.cargo/env
+
+# Install maturin
+pip install maturin
+
+# Verify
+rustc --version
+maturin --version
+```
 
 ---
 

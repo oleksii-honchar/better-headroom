@@ -25,9 +25,11 @@ See **[FEATURES.md](./docs-fork/FEATURES.md)** for detailed descriptions and con
 ### Prerequisites
 
 - **macOS** (Apple Silicon recommended)
-- **maturin** — for building the Python/Rust hybrid package
-- **Rust** — for compiling the Rust core
+- **Python 3.11+** — for the virtual environment
 - **Git** — for fetching and building
+
+> **Note:** maturin, Rust, and better-litellm are auto-installed by the build script if missing.
+> The build script installs better-litellm from `../better-litellm` to satisfy headroom's `litellm>=1.86.2` requirement (PyPI only has 1.83.9).
 
 ### Quick Install (Recommended)
 
@@ -77,7 +79,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-headroom-ai = { path = "/Users/oleksii.honchar/www/misc/better-headroom" }
+headroom-ai = { path = "../better-headroom" }
 ```
 
 ---

@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 # Model pattern matching for tokenizer selection
 # Order matters - more specific patterns first
 MODEL_PATTERNS: list[tuple[str, str]] = [
-    # OpenAI models -> tiktoken
+    # OpenAI models -> tiktoken (gpt-5 added 2025-06-29 for gpt-5.5/gpt-5.4 support)
     (r"^gpt-5", "tiktoken"),
     (r"^gpt-4o", "tiktoken"),
     (r"^gpt-4", "tiktoken"),

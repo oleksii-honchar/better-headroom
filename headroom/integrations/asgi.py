@@ -133,8 +133,41 @@ class CompressionMiddleware:
         tokens_after = 0
         try:
             body_json = json.loads(full_body)
-            messages = body_json.get("messages", [])
             model = body_json.get("model", "")
+
+            # Extract messages from the request body.
+            # Chat Completions uses "messages", Responses API uses "input".
+            # Normalise both into messages list format for the pipeline.
+            messages: list = body_json.get("messages", [])  # Chat Completions
+            input_field = body_json.get("input")  # Responses API
+            if not messages and input_field is not None:
+                if isinstance(input_field, str):
+                    # Simple string prompt → wrap as a user message
+                    messages = [{"role": "user", "content": input_field}]
+                elif isinstance(input_field, list):
+                    # Responses API input items — normalise to messages.
+                    # Item types: "message" (has role+content) or others
+                    # (web_search_call, file, etc.) that we skip.
+                    normalised: list[dict] = []
+                    for item in input_field:
+                        if isinstance(item, dict) and item.get("type") == "message":
+                            role = item.get("role", "user")
+                            content = item.get("content", "")
+                            # content in Responses API is an array of content
+                            # parts; flatten to the format the pipeline expects.
+                            if isinstance(content, list):
+                                text_parts = [
+                                    p.get("text", "")
+                                    for p in content
+                                    if isinstance(p, dict)
+                                    and p.get("type") == "input_text"
+                                ]
+                                content = "\n".join(text_parts) if len(text_parts) > 1 else (
+                                    text_parts[0] if text_parts else ""
+                                )
+                            normalised.append({"role": role, "content": content})
+                    messages = normalised
+            messages_was_input = input_field is not None  # track original field name
 
             if messages:
                 if self._api_key:
@@ -143,7 +176,22 @@ class CompressionMiddleware:
                     result = self._local_compress(messages, model)
 
                 if result and result.get("tokens_saved", 0) > 0 and "messages" in result:
-                    body_json["messages"] = result["messages"]
+                    compressed = result["messages"]
+                    if messages_was_input:
+                        # Write back to "input" field for Responses API
+                        # Round-trip through messages → Responses API format
+                        body_json["input"] = [
+                            {
+                                "type": "message",
+                                "role": m.get("role", "user"),
+                                "content": [
+                                    {"type": "input_text", "text": m.get("content", "")}
+                                ],
+                            }
+                            for m in compressed
+                        ]
+                    else:
+                        body_json["messages"] = compressed
                     full_body = json.dumps(body_json).encode("utf-8")
                     tokens_saved = result["tokens_saved"]
                     tokens_before = result.get("tokens_before", 0)

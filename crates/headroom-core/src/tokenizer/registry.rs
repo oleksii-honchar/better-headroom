@@ -40,10 +40,11 @@ pub enum Backend {
 pub fn detect_backend(model: &str) -> Backend {
     let m = model.to_ascii_lowercase();
 
-    // OpenAI BPE-tokenized families (gpt-3.5/4/4o + o1/o3 reasoning + embeddings + legacy davinci/curie/babbage/ada + code-).
+    // OpenAI BPE-tokenized families (gpt-3.5/4/4o/5 + o1/o3 reasoning + embeddings + legacy davinci/curie/babbage/ada + code- + code-review).
     if m.starts_with("gpt-4o")
         || m.starts_with("gpt-4")
         || m.starts_with("gpt-3.5")
+        || m.starts_with("gpt-5")
         || m.starts_with("o1")
         || m.starts_with("o3")
         || m.starts_with("text-embedding")
@@ -53,6 +54,7 @@ pub fn detect_backend(model: &str) -> Backend {
         || m.starts_with("babbage")
         || m.starts_with("ada")
         || m.starts_with("code-")
+        || m.starts_with("code-review")
     {
         return Backend::Tiktoken;
     }

@@ -37,6 +37,8 @@ MODEL_PATTERNS: list[tuple[str, str]] = [
     (r"^curie", "tiktoken"),
     (r"^babbage", "tiktoken"),
     (r"^ada", "tiktoken"),
+    # Code review models served via OpenAI-compatible APIs
+    (r"^code-review", "tiktoken"),
     # Anthropic models -> estimation (Claude uses custom tokenizer)
     (r"^claude-", "anthropic"),
     # Llama family -> huggingface (when available)
